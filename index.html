@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ibassistant — Бизнес на автопилоте</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Unbounded:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f7ff;--bg2:#eef1fb;--sur:#ffffff;--brd:rgba(79,127,255,.15);--ac:#3b6ef0;--gl:rgba(59,110,240,.2);--tx:#1a1f36;--mu:#6b7280;--wh:#1a1f36;--gr:linear-gradient(135deg,#3b6ef0,#1a56db)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--tx);overflow-x:hidden}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-evenly;padding:0 6vw;height:68px;background:rgba(245,247,255,.92);backdrop-filter:blur(18px);border-bottom:1px solid var(--brd)}
+.logo{font-family:'Unbounded',sans-serif;font-size:1.2rem;font-weight:900;background:var(--gr);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.nl{display:flex;gap:2rem;list-style:none}
+.nl a{color:var(--mu);text-decoration:none;font-size:.875rem;font-weight:500;transition:color .2s}
+.nl a:hover{color:var(--ac)}
+.ncta{background:var(--gr);color:#fff;border:none;padding:.55rem 1.4rem;border-radius:8px;font-family:'Manrope',sans-serif;font-size:.875rem;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;transition:opacity .2s}
+.ncta:hover{opacity:.85}
+.bur{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px}
+.bur span{width:24px;height:2px;background:var(--tx);border-radius:2px;display:block}
+.mm{display:none;position:fixed;top:68px;left:0;right:0;bottom:0;z-index:99;background:var(--bg);padding:2rem 6vw;flex-direction:column;gap:1.5rem;overflow-y:auto}
+.mm.open{display:flex}
+.mm a{color:var(--tx);text-decoration:none;font-size:1.1rem;font-weight:600;border-bottom:1px solid rgba(59,110,240,.12);padding-bottom:1rem}
+.mm .ncta{text-align:center;border-radius:10px;padding:.8rem;font-size:1rem}
+
+/* HERO */
+#hero{min-height:100vh;display:flex;align-items:center;padding:120px 6vw 80px;position:relative;overflow:hidden}
+.hbg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 60% 40%,rgba(59,110,240,.08),transparent 70%),radial-gradient(ellipse 50% 50% at 30% 70%,rgba(59,110,240,.06),transparent 60%)}
+.hgrd{position:absolute;inset:0;background-image:linear-gradient(rgba(59,110,240,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(59,110,240,.1) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 100%)}
+.hc{position:relative;z-index:1;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+.hbadge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(59,110,240,.1);border:1px solid rgba(59,110,240,.3);padding:.35rem .9rem;border-radius:100px;font-size:.78rem;font-weight:600;color:var(--ac);margin-bottom:1.5rem}
+.hbadge::before{content:'●';font-size:.5rem;animation:pu 2s infinite}
+@keyframes pu{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-family:'Unbounded',sans-serif;font-size:clamp(2.2rem,5vw,4rem);font-weight:900;line-height:1.1;margin-bottom:1.5rem;color:var(--tx)}
+h1 span{background:var(--gr);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hsub{font-size:1.25rem;color:var(--mu);line-height:1.8;max-width:560px;margin-bottom:2.5rem}
+.hbts{display:flex;gap:1rem;flex-wrap:wrap}
+.bp{background:var(--gr);color:#fff;border:none;padding:.85rem 2rem;border-radius:10px;font-family:'Manrope',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:opacity .2s,transform .2s;box-shadow:0 4px 20px var(--gl)}
+.bp:hover{opacity:.88;transform:translateY(-2px)}
+.bp:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.bs{background:transparent;color:var(--tx);border:1px solid rgba(59,110,240,.3);padding:.85rem 2rem;border-radius:10px;font-family:'Manrope',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;transition:border-color .2s,color .2s}
+.bs:hover{border-color:var(--ac);color:var(--ac)}
+.hst{display:flex;gap:3rem;margin-top:4rem;flex-wrap:wrap}
+.stn{font-family:'Unbounded',sans-serif;font-size:2rem;font-weight:900;color:var(--tx)}
+.stn span{color:var(--ac)}
+.stl{font-size:.95rem;color:var(--mu);margin-top:.35rem}
+
+/* COMMON */
+section{padding:100px 6vw}
+.stag{display:inline-block;font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ac);margin-bottom:.8rem}
+h2{font-family:'Unbounded',sans-serif;font-size:clamp(1.6rem,3vw,2.5rem);font-weight:800;color:var(--tx);line-height:1.2;margin-bottom:1rem}
+h2 span{background:var(--gr);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.ss{font-size:1.15rem;color:var(--mu);max-width:580px;line-height:1.8;margin-bottom:3.5rem}
+
+/* BENEFITS */
+#ben{background:var(--bg2)}
+.bg3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+.bc{background:var(--sur);border:1px solid rgba(59,110,240,.12);border-radius:16px;padding:1.8rem;transition:border-color .3s,transform .3s,box-shadow .3s}
+.bc:hover{border-color:rgba(59,110,240,.4);transform:translateY(-4px);box-shadow:0 8px 32px rgba(59,110,240,.1)}
+.bci{width:48px;height:48px;border-radius:12px;background:rgba(59,110,240,.1);display:flex;align-items:center;justify-content:center;margin-bottom:1.2rem;font-size:1.4rem}
+.bc h3{font-size:1rem;font-weight:700;color:var(--tx);margin-bottom:.5rem}
+.bc p{font-size:1rem;color:var(--mu);line-height:1.7}
+
+/* INDUSTRIES */
+.tabs{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem}
+.ind-progress{height:3px;background:rgba(59,110,240,.12);border-radius:2px;margin-bottom:2rem;overflow:hidden}
+.ind-bar{height:100%;width:0%;background:var(--ac);border-radius:2px;animation:indProg 4s linear infinite}
+@keyframes indProg{from{width:0%}to{width:100%}}
+.tab{background:var(--sur);border:1px solid rgba(59,110,240,.2);color:var(--mu);padding:.5rem 1.2rem;border-radius:100px;font-family:'Manrope',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}
+.tab.on,.tab:hover{background:rgba(59,110,240,.1);border-color:var(--ac);color:var(--ac)}
+.ind-slider{overflow:hidden;position:relative}
+.ind-track{display:flex;transition:transform .5s cubic-bezier(.4,0,.2,1)}
+.ip{min-width:100%;display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;opacity:0;transition:opacity .4s ease}
+.ip.on{opacity:1}
+.ip h3{font-size:1.5rem;font-weight:800;color:var(--tx);margin-bottom:1rem}
+.ip p{font-size:1.05rem;color:var(--mu);line-height:1.9;margin-bottom:1.5rem}
+.ifl{list-style:none;display:flex;flex-direction:column;gap:.75rem}
+.ifl li{display:flex;align-items:center;gap:.75rem;font-size:1.05rem;color:var(--tx)}
+.ifl li::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--ac);flex-shrink:0}
+.iv{background:var(--bg2);border:1px solid rgba(59,110,240,.15);border-radius:20px;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;font-size:5rem}
+
+/* SERVICES */
+#svc{background:var(--bg2)}
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
+.sc{background:var(--sur);border:1px solid rgba(59,110,240,.12);border-radius:20px;padding:2rem;position:relative;overflow:hidden;transition:border-color .3s,transform .3s,box-shadow .3s}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gr);opacity:0;transition:opacity .3s}
+.sc:hover{border-color:rgba(59,110,240,.35);transform:translateY(-4px);box-shadow:0 8px 32px rgba(59,110,240,.1)}
+.sc:hover::before{opacity:1}
+.sn{font-family:'Unbounded',sans-serif;font-size:2.5rem;font-weight:900;color:rgba(79,127,255,.15);display:block;margin-bottom:1.2rem}
+.sc h3{font-size:1.1rem;font-weight:700;color:var(--tx);margin-bottom:.75rem}
+.sc p{font-size:1rem;color:var(--mu);line-height:1.8}
+
+/* SOFTWARE */
+.swg{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:2rem}
+.swc{background:var(--sur);border:1px solid rgba(59,110,240,.15);border-radius:20px;padding:2.5rem;transition:border-color .3s,transform .3s;display:flex;flex-direction:column}
+.swc:hover{border-color:rgba(59,110,240,.45);transform:translateY(-4px);box-shadow:0 8px 32px rgba(59,110,240,.12)}
+.swl{height:52px;display:flex;align-items:center;margin-bottom:.75rem}
+.swl img{max-height:42px;max-width:170px;object-fit:contain;filter:none}
+.swt{font-size:.75rem;color:var(--ac);font-weight:600;text-transform:uppercase;letter-spacing:.1em;margin-bottom:1.2rem}
+.swc p{font-size:1.05rem;color:var(--mu);line-height:1.8;margin-bottom:1.5rem}
+.swf{list-style:none;display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.8rem;flex:1}
+.swf li{font-size:1rem;color:var(--tx);display:flex;align-items:center;gap:.6rem}
+.swf li::before{content:'✓';color:var(--ac);font-weight:800}
+
+/* CLIENTS */
+#cli{background:var(--bg2)}
+.cw{overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,black 10%,black 90%,transparent);mask:linear-gradient(90deg,transparent,black 10%,black 90%,transparent)}
+.ct{display:flex;gap:2.5rem;animation:sc 40s linear infinite;width:max-content;align-items:center}
+.ct:hover{animation-play-state:paused}
+@keyframes sc{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.cl{background:var(--sur);border:1px solid rgba(59,110,240,.12);border-radius:24px;padding:2.2rem 2.5rem 1.8rem;display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;gap:.75rem;height:260px;min-width:260px;flex-shrink:0;transition:border-color .3s,box-shadow .3s,transform .3s;box-shadow:0 2px 12px rgba(59,110,240,.06)}
+.cl:hover{border-color:rgba(59,110,240,.5);box-shadow:0 12px 40px rgba(59,110,240,.18);transform:translateY(-5px)}
+.cl img{height:90px;max-width:180px;object-fit:contain;filter:none;display:block;flex-shrink:0}
+.cl-name{font-size:1.1rem;font-weight:800;color:var(--tx);text-align:center;letter-spacing:.01em;background:var(--bg2);padding:.35rem 1rem;border-radius:100px;border:1px solid rgba(59,110,240,.15);white-space:nowrap}
+.cl-desc{font-size:1rem;font-weight:500;color:var(--mu);text-align:center;line-height:1.4;padding:0 .5rem}
+
+/* FAQ */
+.fl{max-width:720px}
+.fi{border-bottom:1px solid var(--brd)}
+.fb{display:flex;justify-content:space-evenly;align-items:center;padding:1.3rem 0;cursor:pointer;font-weight:600;font-size:1rem;color:var(--tx);background:none;border:none;width:100%;text-align:left;transition:color .2s}
+.fb:hover{color:var(--ac)}
+.fic{width:24px;height:24px;border-radius:50%;border:1px solid rgba(59,110,240,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .3s,background .3s;color:var(--mu);font-size:.9rem}
+.fi.on .fic{transform:rotate(45deg);background:var(--ac);border-color:var(--ac);color:#fff}
+.fa{max-height:0;overflow:hidden;transition:max-height .35s ease}
+.fa p{padding-bottom:1.2rem;color:var(--mu);line-height:1.85;font-size:1.05rem}
+
+/* CTA */
+#cta{background:var(--bg2);text-align:center;position:relative;overflow:hidden}
+#cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(59,110,240,.07),transparent 70%)}
+#cta .inn{position:relative;z-index:1;max-width:600px;margin:0 auto}
+#cta p{color:var(--mu);margin-bottom:2rem;line-height:1.7}
+
+/* CONTACTS */
+.cgr{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start}
+.ctr{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem}
+.cti{width:44px;height:44px;border-radius:12px;background:rgba(59,110,240,.1);border:1px solid rgba(59,110,240,.2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.ctt small{display:block;font-size:.75rem;color:var(--mu);margin-bottom:.1rem}
+.ctt a,.ctt span{font-weight:600;color:var(--tx);text-decoration:none;font-size:.95rem}
+
+/* SOCIAL BUTTONS */
+.socs{display:flex;gap:.75rem;margin-top:2rem}
+.soc{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;text-decoration:none;transition:transform .2s,box-shadow .2s;border:1px solid transparent}
+.soc:hover{transform:translateY(-3px)}
+.soc svg{width:26px;height:26px;display:block}
+.swa{background:rgba(37,211,102,.15);border-color:rgba(37,211,102,.4)}
+.swa:hover{background:rgba(37,211,102,.25);box-shadow:0 4px 20px rgba(37,211,102,.2)}
+.sig{background:rgba(214,41,118,.15);border-color:rgba(214,41,118,.4)}
+.sig:hover{background:rgba(214,41,118,.25);box-shadow:0 4px 20px rgba(214,41,118,.2)}
+.stt{background:#1a1f36;border-color:#1a1f36}
+.stt:hover{background:#2d3561;border-color:#2d3561;box-shadow:0 4px 20px rgba(26,31,54,.2)}
+
+/* FORM */
+.fcard{background:var(--sur);border:1px solid rgba(59,110,240,.15);box-shadow:0 4px 24px rgba(59,110,240,.08);border-radius:20px;padding:2.5rem}
+.fcard h3{font-size:1.2rem;font-weight:700;color:var(--tx);margin-bottom:.5rem}
+.fcard .fsub2{font-size:.875rem;color:var(--mu);margin-bottom:1.8rem}
+.fg{margin-bottom:1.2rem}
+.fg label{display:block;font-size:.78rem;font-weight:600;color:var(--mu);margin-bottom:.45rem;letter-spacing:.05em;text-transform:uppercase}
+.fg input,.fg select{width:100%;background:#f8faff;border:1px solid rgba(59,110,240,.2);border-radius:10px;padding:.8rem 1rem;color:var(--wh);font-family:'Manrope',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s;-webkit-appearance:none}
+.fg input:focus,.fg select:focus{border-color:var(--ac);background:#fff}
+.fg select option{background:#fff}
+.cc{text-align:right;font-size:.72rem;color:var(--mu);margin-top:.3rem}
+.fsb{width:100%;background:var(--gr);color:#fff;border:none;padding:.95rem;border-radius:10px;font-family:'Manrope',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:opacity .2s,transform .2s;margin-top:.5rem}
+.fsb:hover{opacity:.88;transform:translateY(-1px)}
+.fsb:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.ok{display:none;text-align:center;padding:2rem}
+.ok .ck{font-size:3rem;margin-bottom:1rem}
+.ok h4{color:var(--tx);font-size:1.2rem;margin-bottom:.5rem}
+.ok p{color:var(--mu)}
+
+/* FOOTER */
+footer{border-top:1px solid rgba(59,110,240,.15);padding:2.5rem 6vw;display:flex;justify-content:space-evenly;align-items:center;flex-wrap:wrap;gap:1.5rem}
+.fll{display:flex;gap:2rem;list-style:none}
+.fll a{color:var(--mu);text-decoration:none;font-size:.85rem;transition:color .2s}
+.fll a:hover{color:var(--wh)}
+
+/* MODAL */
+.ov{display:none;position:fixed;inset:0;z-index:200;background:rgba(30,40,80,.45);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:1.5rem}
+.ov.open{display:flex}
+.mod{background:var(--sur);border:1px solid rgba(59,110,240,.2);box-shadow:0 20px 60px rgba(59,110,240,.15);border-radius:24px;padding:2.5rem;max-width:480px;width:100%;position:relative;max-height:90vh;overflow-y:auto}
+.mcl{position:absolute;top:1.2rem;right:1.2rem;width:32px;height:32px;border-radius:8px;background:var(--bg2);border:1px solid rgba(59,110,240,.15);color:var(--mu);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:color .2s}
+.mcl:hover{color:var(--wh)}
+
+/* REVEAL */
+.rev{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
+.rev.vis{opacity:1;transform:translateY(0)}
+
+@media(max-width:768px){.nl,.ncta.desk{display:none}.bur{display:flex}.ip{grid-template-columns:1fr}.iv{display:none}.cgr{grid-template-columns:1fr;gap:3rem}.hst{gap:2rem}.hc{grid-template-columns:1fr}.hero-logo-wrap{display:none}}
+
+.hero-logo-wrap{display:flex;align-items:center;justify-content:center}
+.hero-logo-svg{width:min(420px,45vw);height:auto;filter:drop-shadow(0 20px 60px rgba(59,110,240,.25))}
+
+.lang-sw{display:flex;gap:.3rem;align-items:center;margin-right:.5rem}
+.lang-btn{background:transparent;border:1px solid rgba(59,110,240,.25);color:var(--mu);padding:.28rem .6rem;border-radius:6px;font-family:'Manrope',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.04em}
+.lang-btn.active{background:var(--ac);border-color:var(--ac);color:#fff}
+.lang-btn:hover:not(.active){border-color:var(--ac);color:var(--ac)}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#hero" class="logo">ibassistant</a>
+  <ul class="nl">
+    <li><a href="#ben" data-i18n="nav_ben">Преимущества</a></li>
+    <li><a href="#svc" data-i18n="nav_svc">Услуги</a></li>
+    <li><a href="#sw" data-i18n="nav_sw">ПО</a></li>
+    <li><a href="#cli" data-i18n="nav_cli">Клиенты</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#con" data-i18n="nav_con">Контакты</a></li>
+  </ul>
+  <div class="lang-sw">
+    <button class="lang-btn active" onclick="setLang('ru')">РУ</button>
+    <button class="lang-btn" onclick="setLang('kz')">ҚАЗ</button>
+    <button class="lang-btn" onclick="setLang('en')">EN</button>
+  </div>
+  <a href="#con" class="ncta desk" id="nav-cta" data-i18n="cta_btn">Оставить заявку</a>
+  <button class="bur" onclick="tMM()"><span></span><span></span><span></span></button>
+</nav>
+<div class="mm" id="mmenu">
+  <a href="#ben" onclick="cMM()" data-i18n="nav_ben">Преимущества</a>
+  <a href="#svc" onclick="cMM()" data-i18n="nav_svc">Услуги</a>
+  <a href="#sw" onclick="cMM()" data-i18n="nav_sw">ПО</a>
+  <a href="#cli" onclick="cMM()" data-i18n="nav_cli">Клиенты</a>
+  <a href="#faq" onclick="cMM()">FAQ</a>
+  <a href="#con" onclick="cMM()" data-i18n="nav_con">Контакты</a>
+  <a href="#con" class="ncta" onclick="cMM()" data-i18n="cta_btn">Оставить заявку</a>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hbg"></div><div class="hgrd"></div>
+  <div class="hc">
+    <div class="hero-text">
+      <div class="hbadge" data-i18n="hero_badge">Автоматизация бизнеса в Казахстане</div>
+      <h1 data-i18n="hero_h1">Переведите бизнес<br>в режим <span>автопилота</span></h1>
+      <p class="hsub" data-i18n="hero_sub">Откажитесь от рутинных задач, снизьте операционные затраты и увеличьте прибыль. Эффект ощутим уже в первый месяц внедрения.</p>
+      <div class="hbts">
+        <button class="bp" onclick="oM()" data-i18n="cta_btn">Оставить заявку</button>
+        <a href="#svc" class="bs" data-i18n="hero_svc_btn">Наши услуги →</a>
+      </div>
+      <div class="hst">
+        <div><div class="stn">200<span>+</span></div><div class="stl" data-i18n="stat1">Автоматизированных<br>компаний</div></div>
+        <div><div class="stn">30<span>%</span></div><div class="stl" data-i18n="stat2">Снижение операционных<br>затрат</div></div>
+        <div><div class="stn">1<span> мес.</span></div><div class="stl" data-i18n="stat3">До первого<br>результата</div></div>
+      </div>
+    </div>
+    <div class="hero-logo-wrap">
+      <svg class="hero-logo-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#e8eeff"/>
+            <stop offset="100%" style="stop-color:#d0dcff"/>
+          </linearGradient>
+          <linearGradient id="chevGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#3b6ef0"/>
+            <stop offset="100%" style="stop-color:#1a56db"/>
+          </linearGradient>
+          <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#22d3a0"/>
+            <stop offset="100%" style="stop-color:#16b389"/>
+          </linearGradient>
+        </defs>
+        <!-- Background circle -->
+        <circle cx="200" cy="200" r="190" fill="url(#bgGrad)" opacity="0.9"/>
+        <!-- Outer ring -->
+        <circle cx="200" cy="200" r="190" fill="none" stroke="#3b6ef0" stroke-width="2" opacity="0.3"/>
+
+        <!-- Chevron 1 (left, accent teal) -->
+        <path d="M 118 140 L 148 200 L 118 260 L 143 260 L 173 200 L 143 140 Z" fill="url(#accentGrad)"/>
+        <!-- Chevron 2 (middle, blue) -->
+        <path d="M 150 140 L 180 200 L 150 260 L 175 260 L 205 200 L 175 140 Z" fill="url(#chevGrad)"/>
+
+        <!-- BA text -->
+        <!-- B -->
+        <text x="212" y="218" font-family="Arial Black, sans-serif" font-size="88" font-weight="900" fill="#1a1f36" letter-spacing="-2">BA</text>
+
+        <!-- Tagline -->
+        <text x="200" y="300" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#3b6ef0" text-anchor="middle" letter-spacing="2">IT Business Assistant</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFITS -->
+<section id="ben">
+  <div class="rev"><div class="stag" data-i18n="ben_tag">Зачем автоматизировать</div><h2 data-i18n="ben_h2">Эффект от автоматизации<br><span>будет ощутим сразу</span></h2><p class="ss" data-i18n="ben_sub">Управляйте бизнесом из любой точки мира, контролируйте показатели и увеличивайте скорость роста.</p></div>
+  <div class="bg3">
+    <div class="bc rev"><div class="bci">🌍</div><h3 data-i18n="ben1_h">Управление из любой точки мира</h3><p data-i18n="ben1_p">Контролируйте все процессы через телефон или ноутбук — из офиса, дома или другой страны.</p></div>
+    <div class="bc rev"><div class="bci">📊</div><h3 data-i18n="ben2_h">Контроль показателей и прибыли</h3><p data-i18n="ben2_p">Автоматические отчёты в реальном времени. Вы всегда знаете, что происходит в компании.</p></div>
+    <div class="bc rev"><div class="bci">⚡</div><h3 data-i18n="ben3_h">Высокая скорость масштабирования</h3><p data-i18n="ben3_p">Открывайте новые точки и запускайте процессы без увеличения штата сотрудников.</p></div>
+    <div class="bc rev"><div class="bci">🤝</div><h3 data-i18n="ben4_h">Качество обслуживания клиентов</h3><p data-i18n="ben4_p">Быстрее обрабатывайте заказы, меньше ошибок, выше удовлетворённость покупателей.</p></div>
+    <div class="bc rev"><div class="bci">📋</div><h3 data-i18n="ben5_h">Автоматические отчёты</h3><p data-i18n="ben5_p">Забудьте об Excel-таблицах — система сама формирует нужные отчёты по расписанию.</p></div>
+    <div class="bc rev"><div class="bci">🔒</div><h3 data-i18n="ben6_h">Повышение контроля</h3><p data-i18n="ben6_p">Фиксируйте каждое действие сотрудников, минимизируйте злоупотребления и потери.</p></div>
+  </div>
+</section>
+
+<!-- INDUSTRIES -->
+<section id="ind">
+  <div class="rev"><div class="stag" data-i18n="ind_tag">Отрасли</div><h2 data-i18n="ind_h2">Автоматизируем <span>любой бизнес</span></h2><p class="ss" data-i18n="ind_sub">Работаем с разными сферами — от торговли до сельского хозяйства.</p></div>
+  <div class="tabs rev">
+    <button class="tab on" onclick="sT('t1',this)" data-i18n="ind_t1">🛒 Торговля</button>
+    <button class="tab" onclick="sT('t2',this)" data-i18n="ind_t2">🏭 Производство</button>
+    <button class="tab" onclick="sT('t3',this)" data-i18n="ind_t3">🏨 Гостиницы</button>
+    <button class="tab" onclick="sT('t4',this)" data-i18n="ind_t4">🍽️ Рестораны</button>
+    <button class="tab" onclick="sT('t5',this)" data-i18n="ind_t5">🌾 Сельское хозяйство</button>
+    <button class="tab" onclick="sT('t6',this)" data-i18n="ind_t6">🏗️ Строительство</button>
+  </div>
+  <div class="ind-progress"><div class="ind-bar" id="indBar"></div></div>
+  <div class="ind-slider">
+    <div class="ind-track" id="indTrack">
+      <div id="t1" class="ip on"><div><h3 data-i18n="ip1_h">Автоматизация торговли</h3><p data-i18n="ip1_p">Внедрите современную систему учёта товаров, управляйте остатками, ценами и закупками.</p><ul class="ifl"><li data-i18n="ip1_l1">Учёт товаров и остатков в реальном времени</li><li data-i18n="ip1_l2">Автоматические заказы поставщикам</li><li data-i18n="ip1_l3">Программа лояльности и CRM</li><li data-i18n="ip1_l4">Управление несколькими точками</li><li data-i18n="ip1_l5">Интеграция с онлайн-кассой</li></ul></div><div class="iv">🛒</div></div>
+      <div id="t2" class="ip"><div><h3 data-i18n="ip2_h">Автоматизация производства</h3><p data-i18n="ip2_p">Контролируйте весь производственный цикл от сырья до готовой продукции в одной системе.</p><ul class="ifl"><li data-i18n="ip2_l1">Учёт сырья и готовой продукции</li><li data-i18n="ip2_l2">Контроль производственных процессов</li><li data-i18n="ip2_l3">Управление заказами и отгрузками</li><li data-i18n="ip2_l4">Интеграция со складом</li><li data-i18n="ip2_l5">Аналитика и отчётность</li></ul></div><div class="iv">🏭</div></div>
+      <div id="t3" class="ip"><div><h3 data-i18n="ip3_h">Автоматизация гостиниц</h3><p data-i18n="ip3_p">Управляйте бронированиями, номерным фондом и персоналом через единую систему.</p><ul class="ifl"><li data-i18n="ip3_l1">Онлайн-бронирование номеров</li><li data-i18n="ip3_l2">Управление загруженностью</li><li data-i18n="ip3_l3">Учёт дополнительных услуг</li><li data-i18n="ip3_l4">Контроль персонала</li><li data-i18n="ip3_l5">Интеграция с OTA-платформами</li></ul></div><div class="iv">🏨</div></div>
+      <div id="t4" class="ip"><div><h3 data-i18n="ip4_h">Автоматизация ресторанов</h3><p data-i18n="ip4_p">Ускорьте обслуживание, снизьте потери и управляйте меню, кухней и персоналом легко.</p><ul class="ifl"><li data-i18n="ip4_l1">Автоматизация зала и кухни</li><li data-i18n="ip4_l2">Управление меню и ценами</li><li data-i18n="ip4_l3">Учёт блюд и ингредиентов</li><li data-i18n="ip4_l4">Программы лояльности</li><li data-i18n="ip4_l5">Онлайн-доставка и агрегаторы</li></ul></div><div class="iv">🍽️</div></div>
+      <div id="t5" class="ip"><div><h3 data-i18n="ip5_h">Автоматизация сельского хозяйства</h3><p data-i18n="ip5_p">Ведите учёт урожая, техники, склада и финансов в единой системе управления АПК.</p><ul class="ifl"><li data-i18n="ip5_l1">Учёт земельных участков и культур</li><li data-i18n="ip5_l2">Управление техникой и ресурсами</li><li data-i18n="ip5_l3">Складской учёт зерна и продукции</li><li data-i18n="ip5_l4">Финансовый учёт и отчётность</li><li data-i18n="ip5_l5">Контроль сотрудников и задач</li></ul></div><div class="iv">🌾</div></div>
+      <div id="t6" class="ip"><div><h3 data-i18n="ip6_h">Автоматизация строительства</h3><p data-i18n="ip6_p">Управляйте проектами, материалами, подрядчиками и финансами строительных объектов.</p><ul class="ifl"><li data-i18n="ip6_l1">Управление проектами и объектами</li><li data-i18n="ip6_l2">Учёт материалов и поставщиков</li><li data-i18n="ip6_l3">Контроль бюджета и смет</li><li data-i18n="ip6_l4">Документооборот и согласования</li><li data-i18n="ip6_l5">Контроль сроков и задач</li></ul></div><div class="iv">🏗️</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="svc">
+  <div class="rev"><div class="stag" data-i18n="svc_tag">Что мы делаем</div><h2 data-i18n="svc_h2">Наши <span>услуги</span></h2><p class="ss" data-i18n="svc_sub">Полный цикл — от анализа бизнеса до запуска и поддержки системы автоматизации.</p></div>
+  <div class="sg">
+    <div class="sc rev"><span class="sn">01</span><h3 data-i18n="svc1_h">Внедрение систем учёта</h3><p data-i18n="svc1_p">Настройка и запуск систем товарного учёта, кассовых решений и ERP под ваш бизнес.</p></div>
+    <div class="sc rev"><span class="sn">02</span><h3 data-i18n="svc2_h">CRM и автоматизация продаж</h3><p data-i18n="svc2_p">Внедрение Bitrix24 и других CRM-систем: воронки, задачи, автоматические рассылки и аналитика.</p></div>
+    <div class="sc rev"><span class="sn">03</span><h3 data-i18n="svc3_h">Интеграция и настройка ПО</h3><p data-i18n="svc3_p">Интегрируем системы между собой: 1С, iiko, Rosta, онлайн-кассы, банки и мессенджеры.</p></div>
+    <div class="sc rev"><span class="sn">04</span><h3 data-i18n="svc4_h">Обучение персонала</h3><p data-i18n="svc4_p">Проводим обучение сотрудников работе с новыми системами — лично или онлайн.</p></div>
+    <div class="sc rev"><span class="sn">05</span><h3 data-i18n="svc5_h">Техническая поддержка</h3><p data-i18n="svc5_p">Оперативная поддержка 24/7, обновления и доработка системы под нужды бизнеса.</p></div>
+    <div class="sc rev"><span class="sn">06</span><h3 data-i18n="svc6_h">Поставка оборудования</h3><p data-i18n="svc6_p">Кассы, сканеры, весовое оборудование, мониторы для кухни — полный комплект.</p></div>
+  </div>
+</section>
+
+<!-- SOFTWARE -->
+<section id="sw">
+  <div class="rev"><div class="stag" data-i18n="sw_tag">Программное обеспечение</div><h2 data-i18n="sw_h2">Лучшие <span>решения</span> для вашего бизнеса</h2><p class="ss" data-i18n="sw_sub">Работаем с проверенными платформами — внедряем, настраиваем и сопровождаем.</p></div>
+  <div class="swg">
+    <div class="swc rev">
+      <div class="swl" style="font-family:'Unbounded',sans-serif;font-size:1.4rem;font-weight:900;color:var(--tx)">Bitrix24</div>
+      <div class="swt" data-i18n="sw1_t">CRM · Задачи · Автоматизация</div>
+      <p data-i18n="sw1_p">Единое пространство для управления бизнесом: CRM, задачи, документооборот, автоматизация рабочих процессов без программирования.</p>
+      <ul class="swf"><li data-i18n="sw1_l1">Управление продажами и воронками</li><li data-i18n="sw1_l2">Автоматизация задач и согласований</li><li data-i18n="sw1_l3">Корпоративный портал и чат</li><li data-i18n="sw1_l4">Телефония и рассылки</li></ul>
+      <button class="bp" onclick="oM()" data-i18n="sw_connect">Подключить</button>
+    </div>
+    <div class="swc rev">
+      <div class="swl" style="font-family:'Unbounded',sans-serif;font-size:1.4rem;font-weight:900;color:var(--tx)">iiko</div>
+      <div class="swt" data-i18n="sw2_t">Рестораны · Кафе · Доставка</div>
+      <p data-i18n="sw2_p">Ведущая система автоматизации для общепита: управление залом, кухней, складом и доставкой в одном решении.</p>
+      <ul class="swf"><li data-i18n="sw2_l1">Система заказов и кухонный экран</li><li data-i18n="sw2_l2">Складской и финансовый учёт</li><li data-i18n="sw2_l3">Программа лояльности</li><li data-i18n="sw2_l4">Интеграция с агрегаторами доставки</li></ul>
+      <button class="bp" onclick="oM()" data-i18n="sw_connect">Подключить</button>
+    </div>
+    <div class="swc rev">
+      <div class="swl" style="font-family:'Unbounded',sans-serif;font-size:1.4rem;font-weight:900;color:var(--tx)">Rosta</div>
+      <div class="swt" data-i18n="sw3_t">Торговля · Склад · Аналитика</div>
+      <p data-i18n="sw3_p">Современная система учёта для магазинов, кафе и ресторанов — быстрый старт и удобный интерфейс.</p>
+      <ul class="swf"><li data-i18n="sw3_l1">Учёт товаров и остатков</li><li data-i18n="sw3_l2">Онлайн-касса и фискализация</li><li data-i18n="sw3_l3">Управление сетью торговых точек</li><li data-i18n="sw3_l4">Аналитика продаж в реальном времени</li></ul>
+      <button class="bp" onclick="oM()" data-i18n="sw_connect">Подключить</button>
+    </div>
+  </div>
+</section>
+
+<!-- CLIENTS -->
+<section id="cli">
+  <div class="rev" style="text-align:center;margin-bottom:4rem"><div class="stag" style="font-size:.85rem">Нашим клиентам доверяют</div><h2 style="font-size:clamp(2rem,3.5vw,3rem)">Наши <span>клиенты</span></h2></div>
+  <div class="cw rev">
+    <div class="ct">
+      <div class="cl"><img src="https://static.tildacdn.pro/tild3837-6437-4663-b037-653033336532/-/resize/400x/myata.png" alt="Myata Lounge"><span class="cl-name">Myata Lounge</span><span class="cl-desc">Профессиональный и индивидуальный подход</span></div>
+      <div class="cl"><img src="https://static.tildacdn.pro/tild3137-3463-4131-b161-333362303937/-/resize/400x/urbo.png" alt="Urbo Kitchen"><span class="cl-name">Urbo Kitchen</span><span class="cl-desc">Рады сотрудничеству с вами</span></div>
+      <div class="cl"><img src="https://static.tildacdn.pro/tild3564-3831-4039-a264-323062363839/-/resize/400x/gosushi.png" alt="GoSushi"><span class="cl-name">GoSushi</span><span class="cl-desc">Качество и свежесть в каждом блюде</span></div>
+      <div class="cl"><img src="https://static.tildacdn.pro/tild3835-3561-4334-b566-626436316564/-/resize/400x/vanilla.png" alt="Vanilla Café"><span class="cl-name">Vanilla Café</span><span class="cl-desc">Уют и вкус — наш приоритет</span></div>
+      <div class="cl"><img src="https://static.tildacdn.pro/tild3963-6239-4235-b633-373737656263/-/resize/400x/gruzinsky_dvor.png" alt="Грузинский Двор"><span class="cl-name">Грузинский Двор</span><span class="cl-desc">Традиции грузинской кухни</span></div>
+      <div class="cl"><img src="https://static.tildacdn.pro/tild6166-6364-4462-b334-663637353132/-/resize/400x/lagman_town.png" alt="Lagman Town"><span class="cl-name">Lagman Town</span><span class="cl-desc">Восточная кухня с душой</span></div>
+      <div class="cl"><img src="https://static.tildacdn.pro/tild6636-3937-4431-b831-323664373330/-/resize/400x/arafat.png" alt="Arafat Market"><span class="cl-name">Arafat Market</span><span class="cl-desc">Свежие продукты каждый день</span></div>
+      <div class="cl"><img src="https://static.tildacdn.pro/tild3664-3232-4631-b336-333764366133/-/resize/400x/comf_pro.png" alt="Comfort Pro"><span class="cl-name">Comfort Pro</span><span class="cl-desc">Комфорт и сервис высокого уровня</span></div>
+      <div class="cl"><img src="https://static.tildacdn.pro/tild3837-6437-4663-b037-653033336532/-/resize/400x/myata.png" alt="Myata Lounge"><span class="cl-name">Myata Lounge</span><span class="cl-desc">Профессиональный и индивидуальный подход</span></div>
+      <div class="cl"><img src="https://static.tildacdn.pro/tild3137-3463-4131-b161-333362303937/-/resize/400x/urbo.png" alt="Urbo Kitchen"><span class="cl-name">Urbo Kitchen</span><span class="cl-desc">Рады сотрудничеству с вами</span></div>
+      <div class="cl"><img src="https://static.tildacdn.pro/tild3564-3831-4039-a264-323062363839/-/resize/400x/gosushi.png" alt="GoSushi"><span class="cl-name">GoSushi</span><span class="cl-desc">Качество и свежесть в каждом блюде</span></div>
+      <div class="cl"><img src="https://static.tildacdn.pro/tild3835-3561-4334-b566-626436316564/-/resize/400x/vanilla.png" alt="Vanilla Café"><span class="cl-name">Vanilla Café</span><span class="cl-desc">Уют и вкус — наш приоритет</span></div>
+      <div class="cl"><img src="https://static.tildacdn.pro/tild3963-6239-4235-b633-373737656263/-/resize/400x/gruzinsky_dvor.png" alt="Грузинский Двор"><span class="cl-name">Грузинский Двор</span><span class="cl-desc">Традиции грузинской кухни</span></div>
+      <div class="cl"><img src="https://static.tildacdn.pro/tild6166-6364-4462-b334-663637353132/-/resize/400x/lagman_town.png" alt="Lagman Town"><span class="cl-name">Lagman Town</span><span class="cl-desc">Восточная кухня с душой</span></div>
+      <div class="cl"><img src="https://static.tildacdn.pro/tild6636-3937-4431-b831-323664373330/-/resize/400x/arafat.png" alt="Arafat Market"><span class="cl-name">Arafat Market</span><span class="cl-desc">Свежие продукты каждый день</span></div>
+      <div class="cl"><img src="https://static.tildacdn.pro/tild3664-3232-4631-b336-333764366133/-/resize/400x/comf_pro.png" alt="Comfort Pro"><span class="cl-name">Comfort Pro</span><span class="cl-desc">Комфорт и сервис высокого уровня</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="rev"><div class="stag" data-i18n="faq_tag">Вопросы и ответы</div><h2 data-i18n="faq_h2">Часто задаваемые <span>вопросы</span></h2></div>
+  <div class="fl rev">
+    <div class="fi"><button class="fb" onclick="tF(this)"><span data-i18n="faq1_q">Какие преимущества даёт автоматизация бизнес-процессов?</span><div class="fic">+</div></button><div class="fa"><p data-i18n="faq1_a">Автоматизация снижает операционные затраты на 20–40%, освобождает сотрудников от рутины, уменьшает количество ошибок и даёт руководителю полную картину бизнеса в реальном времени.</p></div></div>
+    <div class="fi"><button class="fb" onclick="tF(this)"><span data-i18n="faq2_q">Какие бизнес-процессы вы можете автоматизировать?</span><div class="fic">+</div></button><div class="fa"><p data-i18n="faq2_a">Мы автоматизируем складской и товарный учёт, управление продажами и CRM, документооборот, финансовую отчётность, работу с клиентами, производственные процессы, HR и многое другое.</p></div></div>
+    <div class="fi"><button class="fb" onclick="tF(this)"><span data-i18n="faq3_q">В каких сферах вы работаете?</span><div class="fic">+</div></button><div class="fa"><p data-i18n="faq3_a">Торговля, производство, гостиничный и ресторанный бизнес, сельское хозяйство, строительство. Если ваша сфера не указана — свяжитесь с нами, найдём решение под ваши задачи.</p></div></div>
+    <div class="fi"><button class="fb" onclick="tF(this)"><span data-i18n="faq4_q">Как долго длится внедрение системы?</span><div class="fic">+</div></button><div class="fa"><p data-i18n="faq4_a">Базовое внедрение занимает 2–4 недели. Более сложные проекты — от 1 до 3 месяцев. Мы всегда составляем реалистичный план и придерживаемся сроков.</p></div></div>
+    <div class="fi"><button class="fb" onclick="tF(this)"><span data-i18n="faq5_q">Какую поддержку вы оказываете после внедрения?</span><div class="fic">+</div></button><div class="fa"><p data-i18n="faq5_a">Техническая поддержка, регулярные обновления и консультации. Ваши сотрудники могут обратиться к нам в рабочее время, а критические вопросы решаются в режиме 24/7.</p></div></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="inn rev">
+    <div class="stag" data-i18n="cta_tag">Начать сейчас</div>
+    <h2 data-i18n="cta_h2">Готовы перевести<br>бизнес на <span>автопилот?</span></h2>
+    <p data-i18n="cta_p">Оставьте заявку — наш менеджер свяжется с вами, проведёт бесплатный аудит и предложит оптимальное решение.</p>
+    <button class="bp" onclick="oM()" data-i18n="cta_btn2">Оставить заявку бесплатно</button>
+  </div>
+</section>
+
+<!-- CONTACTS -->
+<section id="con">
+  <div class="cgr">
+    <div class="rev">
+      <div class="stag" data-i18n="con_tag">Контакты</div>
+      <h2 data-i18n="con_h2">Свяжитесь<br>с <span>нами</span></h2>
+      <div class="ctr"><div class="cti">📞</div><div class="ctt"><small data-i18n="con_phone">Телефон</small><a href="tel:+77760626272" style="font-weight:700;color:var(--ac);text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;transition:opacity .2s" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">+7 776 062 6272</a></div></div>
+      <div class="ctr"><div class="cti">✉️</div><div class="ctt"><small data-i18n="con_email">Email</small><a href="mailto:it.bis.assistant@gmail.com">it.bis.assistant@gmail.com</a></div></div>
+      <div class="ctr"><div class="cti">📍</div><div class="ctt"><small data-i18n="con_addr">Адрес</small><span>Алматы, Казахстан</span></div></div>
+      <div class="socs">
+        <a href="https://wa.me/77760626272" target="_blank" class="soc swa" title="WhatsApp">
+          <svg viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path fill="#25D366" d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-23.1-115-65.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+        </a>
+        <a href="https://www.instagram.com/ibassistant/" target="_blank" class="soc sig" title="Instagram">
+          <svg viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ig2" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#feda75"/><stop offset="25%" style="stop-color:#fa7e1e"/><stop offset="50%" style="stop-color:#d62976"/><stop offset="75%" style="stop-color:#962fbf"/><stop offset="100%" style="stop-color:#4f5bd5"/></linearGradient></defs><path fill="url(#ig2)" d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/></svg>
+        </a>
+        <a href="https://www.tiktok.com/@ibassistankz?_r=1&_t=ZS-96ybaAQ1fAj" target="_blank" class="soc stt" title="TikTok">
+          <svg viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="M448 209.91a210.06 210.06 0 0 1-122.77-39.25v178.72A162.55 162.55 0 1 1 185 188.31v89.89a74.62 74.62 0 1 0 52.23 71.18V0h88a121.18 121.18 0 0 0 1.86 22.17A122.18 122.18 0 0 0 381 102.39a121.43 121.43 0 0 0 67 20.14z"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="fcard rev">
+      <h3 data-i18n="form_h3">Оставить заявку</h3>
+      <p class="fsub2" data-i18n="form_sub">Заполните форму — ответим в течение 15 минут</p>
+      <div id="cF">
+        <div class="fg"><label data-i18n="lbl_name">Ваше имя</label><input id="cN" type="text" placeholder="Иван Иванов"></div>
+        <div class="fg"><label data-i18n="lbl_phone">Телефон</label><input id="cP" type="tel" placeholder="+7 (___) ___-__-__"></div>
+        <div class="fg">
+          <label data-i18n="lbl_sphere">Сфера ИТ</label>
+          <select id="cS"><option value="" disabled selected>Выберите сферу ИТ</option><option>Разработка сайтов</option><option>Разработка мобильных приложений</option><option>Автоматизация бизнес-процессов</option><option>CRM / ERP системы</option><option>IT-консалтинг</option><option>Кибербезопасность</option><option>Облачные решения</option><option>Другое</option></select>
+        </div>
+        <div class="fg">
+          <label data-i18n="lbl_note">Примечание <span style="color:var(--mu);font-weight:400;text-transform:none;font-size:.73rem" data-i18n="lbl_note_hint">(до 40 символов)</span></label>
+          <input id="cNo" type="text" placeholder="Ваш комментарий..." maxlength="40" oninput="document.getElementById('cNc').textContent=this.value.length">
+          <div class="cc"><span id="cNc">0</span>/40</div>
+        </div>
+        <button class="fsb" id="cBtn" onclick="doSend('c')" data-i18n="submit_btn">Отправить заявку</button>
+      </div>
+      <div class="ok" id="cOk"><div class="ck">✅</div><h4 data-i18n="ok_h">Заявка отправлена!</h4><p data-i18n="ok_p">Менеджер свяжется с вами в течение 15 минут.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <a href="#hero" class="logo">ibassistant</a>
+  <ul class="fll"><li><a href="#svc" data-i18n="nav_svc">Услуги</a></li><li><a href="#sw" data-i18n="nav_sw">ПО</a></li><li><a href="#cli" data-i18n="nav_cli">Клиенты</a></li><li><a href="#faq">FAQ</a></li><li><a href="#con" data-i18n="nav_con">Контакты</a></li></ul>
+  <div style="font-size:.8rem;color:var(--mu)">© 2024 ibassistant. Все права защищены.</div>
+</footer>
+
+<!-- MODAL -->
+<div class="ov" id="ov" onclick="if(event.target===this)cM()">
+  <div class="mod">
+    <button class="mcl" onclick="cM()">✕</button>
+    <h3 style="font-size:1.3rem;font-weight:800;color:var(--wh);margin-bottom:.4rem" data-i18n="form_h3">Оставить заявку</h3>
+    <p style="font-size:.875rem;color:var(--mu);margin-bottom:1.8rem" data-i18n="form_sub">Ответим в течение 15 минут</p>
+    <div id="mF">
+      <div class="fg"><label data-i18n="lbl_name">Ваше имя</label><input id="mN" type="text" placeholder="Иван Иванов"></div>
+      <div class="fg"><label data-i18n="lbl_phone">Телефон</label><input id="mP" type="tel" placeholder="+7 (___) ___-__-__"></div>
+      <div class="fg">
+        <label data-i18n="lbl_sphere">Сфера ИТ</label>
+        <select id="mS"><option value="" disabled selected>Выберите сферу ИТ</option><option>Разработка сайтов</option><option>Разработка мобильных приложений</option><option>Автоматизация бизнес-процессов</option><option>CRM / ERP системы</option><option>IT-консалтинг</option><option>Кибербезопасность</option><option>Облачные решения</option><option>Другое</option></select>
+      </div>
+      <div class="fg">
+        <label data-i18n="lbl_note">Примечание <span style="color:var(--mu);font-weight:400;text-transform:none;font-size:.73rem" data-i18n="lbl_note_hint">(до 40 символов)</span></label>
+        <input id="mNo" type="text" placeholder="Ваш комментарий..." maxlength="40" oninput="document.getElementById('mNc').textContent=this.value.length">
+        <div class="cc"><span id="mNc">0</span>/40</div>
+      </div>
+      <button class="fsb" id="mBtn" onclick="doSend('m')" data-i18n="submit_btn">Отправить заявку</button>
+    </div>
+    <div class="ok" id="mOk"><div class="ck">✅</div><h4 data-i18n="ok_h">Заявка отправлена!</h4><p data-i18n="ok_p">Менеджер свяжется с вами в течение 15 минут.</p></div>
+  </div>
+</div>
+
+<script>
+const TK='8763242999:AAF26heBoG9y8vkmDogIz-k2aRa2cCJ2VhY', CI=5802553406;
+
+async function tgSend(name,phone,sphere,note){
+  const t=`\u{1F195} <b>\u041d\u043e\u0432\u0430\u044f \u0437\u0430\u044f\u0432\u043a\u0430 \u2014 ibassistant</b>\n\n\u{1F464} <b>\u0418\u043c\u044f:</b> ${name}\n\u{1F4DE} <b>\u0422\u0435\u043b\u0435\u0444\u043e\u043d:</b> ${phone}\n\u{1F4BB} <b>\u0421\u0444\u0435\u0440\u0430 \u0418\u0422:</b> ${sphere}\n\u{1F4DD} <b>\u041f\u0440\u0438\u043c\u0435\u0447\u0430\u043d\u0438\u0435:</b> ${note||'\u2014'}`;
+  try{
+    const r=await fetch(`https://api.telegram.org/bot${TK}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:CI,text:t,parse_mode:'HTML'})});
+    return(await r.json()).ok;
+  }catch(e){return false;}
+}
+
+async function doSend(ctx){
+  const m=ctx==='m';
+  const name=document.getElementById(m?'mN':'cN').value.trim();
+  const phone=document.getElementById(m?'mP':'cP').value.trim();
+  const sphere=document.getElementById(m?'mS':'cS').value;
+  const note=document.getElementById(m?'mNo':'cNo').value.trim();
+  const btn=document.getElementById(m?'mBtn':'cBtn');
+  if(!name||!phone||!sphere){
+    const msg={ru:'Пожалуйста, заполните все поля.',kz:'Барлық өрістерді толтырыңыз.',en:'Please fill in all fields.'};
+    alert(msg[curLang]||msg.ru);return;
+  }
+  btn.disabled=true;
+  const sendingTxt={ru:'Отправка...', kz:'Жіберілуде...', en:'Sending...'};
+  btn.textContent=sendingTxt[curLang]||sendingTxt.ru;
+  await tgSend(name,phone,sphere,note);
+  document.getElementById(m?'mF':'cF').style.display='none';
+  document.getElementById(m?'mOk':'cOk').style.display='block';
+}
+
+function tMM(){document.getElementById('mmenu').classList.toggle('open');}
+function cMM(){document.getElementById('mmenu').classList.remove('open');}
+function oM(){document.getElementById('ov').classList.add('open');document.body.style.overflow='hidden';}
+function cM(){document.getElementById('ov').classList.remove('open');document.body.style.overflow='';}
+
+const tabOrder = ['t1','t2','t3','t4','t5','t6'];
+let curTab = 0;
+let autoTimer = null;
+
+function sT(id, btn) {
+  curTab = tabOrder.indexOf(id);
+  const track = document.getElementById('indTrack');
+  track.style.transform = 'translateX(-' + (curTab * 100) + '%)';
+  document.querySelectorAll('.ip').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
+  setTimeout(() => { document.getElementById(id).classList.add('on'); }, 150);
+  btn.classList.add('on');
+}
+
+function nextTab() {
+  curTab = (curTab + 1) % tabOrder.length;
+  const id = tabOrder[curTab];
+  const btn = document.querySelectorAll('.tab')[curTab];
+  const track = document.getElementById('indTrack');
+  track.style.transform = 'translateX(-' + (curTab * 100) + '%)';
+  document.querySelectorAll('.ip').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
+  setTimeout(() => { document.getElementById(id).classList.add('on'); }, 150);
+  if (btn) btn.classList.add('on');
+}
+
+function startAuto() {
+  stopAuto();
+  resetBar();
+  autoTimer = setInterval(() => { nextTab(); resetBar(); }, 4000);
+}
+function stopAuto() {
+  clearInterval(autoTimer);
+  const bar = document.getElementById('indBar');
+  if (bar) { bar.style.animation = 'none'; bar.style.width = bar.getBoundingClientRect().width / bar.parentElement.getBoundingClientRect().width * 100 + '%'; }
+}
+function resetBar() {
+  const bar = document.getElementById('indBar');
+  if (!bar) return;
+  bar.style.animation = 'none';
+  bar.offsetHeight; // reflow
+  bar.style.animation = 'indProg 4s linear';
+}
+
+// Start autoplay after page load
+window.addEventListener('load', () => { startAuto(); });
+
+// Pause on hover over the section, resume on leave
+document.addEventListener('DOMContentLoaded', () => {
+  const sec = document.getElementById('ind');
+  if (sec) {
+    sec.addEventListener('mouseenter', stopAuto);
+    sec.addEventListener('mouseleave', startAuto);
+  }
+});
+
+// Restart auto after manual click (with fresh 4s delay)
+document.querySelectorAll && document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => { stopAuto(); startAuto(); });
+  });
+});
+
+function tF(btn){
+  const item=btn.parentElement;
+  const ans=item.querySelector('.fa');
+  const open=item.classList.contains('on');
+  document.querySelectorAll('.fi').forEach(i=>{i.classList.remove('on');i.querySelector('.fa').style.maxHeight='0';});
+  if(!open){item.classList.add('on');ans.style.maxHeight=ans.scrollHeight+'px';}
+}
+
+const ob=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('vis');});},{threshold:0.12});
+document.querySelectorAll('.rev').forEach(el=>ob.observe(el));
+
+// ── TRANSLATIONS ──
+const T = {
+  ru: {
+    nav_ben:'Преимущества', nav_svc:'Услуги', nav_sw:'ПО', nav_cli:'Клиенты', nav_con:'Контакты',
+    cta_btn:'Оставить заявку', cta_btn2:'Оставить заявку бесплатно',
+    hero_badge:'Автоматизация бизнеса в Казахстане',
+    hero_h1:'Переведите бизнес<br>в режим <span>автопилота</span>',
+    hero_sub:'Откажитесь от рутинных задач, снизьте операционные затраты и увеличьте прибыль. Эффект ощутим уже в первый месяц внедрения.',
+    hero_svc_btn:'Наши услуги →',
+    stat1:'Автоматизированных<br>компаний', stat2:'Снижение операционных<br>затрат', stat3:'До первого<br>результата',
+    ben_tag:'Зачем автоматизировать',
+    ben_h2:'Эффект от автоматизации<br><span>будет ощутим сразу</span>',
+    ben_sub:'Управляйте бизнесом из любой точки мира, контролируйте показатели и увеличивайте скорость роста.',
+    ben1_h:'Управление из любой точки мира', ben1_p:'Контролируйте все процессы через телефон или ноутбук — из офиса, дома или другой страны.',
+    ben2_h:'Контроль показателей и прибыли', ben2_p:'Автоматические отчёты в реальном времени. Вы всегда знаете, что происходит в компании.',
+    ben3_h:'Высокая скорость масштабирования', ben3_p:'Открывайте новые точки и запускайте процессы без увеличения штата сотрудников.',
+    ben4_h:'Качество обслуживания клиентов', ben4_p:'Быстрее обрабатывайте заказы, меньше ошибок, выше удовлетворённость покупателей.',
+    ben5_h:'Автоматические отчёты', ben5_p:'Забудьте об Excel-таблицах — система сама формирует нужные отчёты по расписанию.',
+    ben6_h:'Повышение контроля', ben6_p:'Фиксируйте каждое действие сотрудников, минимизируйте злоупотребления и потери.',
+    ind_tag:'Отрасли', ind_h2:'Автоматизируем <span>любой бизнес</span>',
+    ind_sub:'Работаем с разными сферами — от торговли до сельского хозяйства.',
+    ind_t1:'🛒 Торговля', ind_t2:'🏭 Производство', ind_t3:'🏨 Гостиницы', ind_t4:'🍽️ Рестораны', ind_t5:'🌾 Сельское хозяйство', ind_t6:'🏗️ Строительство',
+    ip1_h:'Автоматизация торговли', ip1_p:'Внедрите современную систему учёта товаров, управляйте остатками, ценами и закупками.',
+    ip1_l1:'Учёт товаров и остатков в реальном времени', ip1_l2:'Автоматические заказы поставщикам', ip1_l3:'Программа лояльности и CRM', ip1_l4:'Управление несколькими точками', ip1_l5:'Интеграция с онлайн-кассой',
+    ip2_h:'Автоматизация производства', ip2_p:'Контролируйте весь производственный цикл от сырья до готовой продукции в одной системе.',
+    ip2_l1:'Учёт сырья и готовой продукции', ip2_l2:'Контроль производственных процессов', ip2_l3:'Управление заказами и отгрузками', ip2_l4:'Интеграция со складом', ip2_l5:'Аналитика и отчётность',
+    ip3_h:'Автоматизация гостиниц', ip3_p:'Управляйте бронированиями, номерным фондом и персоналом через единую систему.',
+    ip3_l1:'Онлайн-бронирование номеров', ip3_l2:'Управление загруженностью', ip3_l3:'Учёт дополнительных услуг', ip3_l4:'Контроль персонала', ip3_l5:'Интеграция с OTA-платформами',
+    ip4_h:'Автоматизация ресторанов', ip4_p:'Ускорьте обслуживание, снизьте потери и управляйте меню, кухней и персоналом легко.',
+    ip4_l1:'Автоматизация зала и кухни', ip4_l2:'Управление меню и ценами', ip4_l3:'Учёт блюд и ингредиентов', ip4_l4:'Программы лояльности', ip4_l5:'Онлайн-доставка и агрегаторы',
+    ip5_h:'Автоматизация сельского хозяйства', ip5_p:'Ведите учёт урожая, техники, склада и финансов в единой системе управления АПК.',
+    ip5_l1:'Учёт земельных участков и культур', ip5_l2:'Управление техникой и ресурсами', ip5_l3:'Складской учёт зерна и продукции', ip5_l4:'Финансовый учёт и отчётность', ip5_l5:'Контроль сотрудников и задач',
+    ip6_h:'Автоматизация строительства', ip6_p:'Управляйте проектами, материалами, подрядчиками и финансами строительных объектов.',
+    ip6_l1:'Управление проектами и объектами', ip6_l2:'Учёт материалов и поставщиков', ip6_l3:'Контроль бюджета и смет', ip6_l4:'Документооборот и согласования', ip6_l5:'Контроль сроков и задач',
+    svc_tag:'Что мы делаем', svc_h2:'Наши <span>услуги</span>',
+    svc_sub:'Полный цикл — от анализа бизнеса до запуска и поддержки системы автоматизации.',
+    svc1_h:'Внедрение систем учёта', svc1_p:'Настройка и запуск систем товарного учёта, кассовых решений и ERP под ваш бизнес.',
+    svc2_h:'CRM и автоматизация продаж', svc2_p:'Внедрение Bitrix24 и других CRM-систем: воронки, задачи, автоматические рассылки и аналитика.',
+    svc3_h:'Интеграция и настройка ПО', svc3_p:'Интегрируем системы между собой: 1С, iiko, Rosta, онлайн-кассы, банки и мессенджеры.',
+    svc4_h:'Обучение персонала', svc4_p:'Проводим обучение сотрудников работе с новыми системами — лично или онлайн.',
+    svc5_h:'Техническая поддержка', svc5_p:'Оперативная поддержка 24/7, обновления и доработка системы под нужды бизнеса.',
+    svc6_h:'Поставка оборудования', svc6_p:'Кассы, сканеры, весовое оборудование, мониторы для кухни — полный комплект.',
+    sw_tag:'Программное обеспечение', sw_h2:'Лучшие <span>решения</span> для вашего бизнеса',
+    sw_sub:'Работаем с проверенными платформами — внедряем, настраиваем и сопровождаем.',
+    sw1_t:'CRM · Задачи · Автоматизация',
+    sw1_p:'Единое пространство для управления бизнесом: CRM, задачи, документооборот, автоматизация рабочих процессов без программирования.',
+    sw1_l1:'Управление продажами и воронками', sw1_l2:'Автоматизация задач и согласований', sw1_l3:'Корпоративный портал и чат', sw1_l4:'Телефония и рассылки',
+    sw2_t:'Рестораны · Кафе · Доставка',
+    sw2_p:'Ведущая система автоматизации для общепита: управление залом, кухней, складом и доставкой в одном решении.',
+    sw2_l1:'Система заказов и кухонный экран', sw2_l2:'Складской и финансовый учёт', sw2_l3:'Программа лояльности', sw2_l4:'Интеграция с агрегаторами доставки',
+    sw3_t:'Торговля · Склад · Аналитика',
+    sw3_p:'Современная система учёта для магазинов, кафе и ресторанов — быстрый старт и удобный интерфейс.',
+    sw3_l1:'Учёт товаров и остатков', sw3_l2:'Онлайн-касса и фискализация', sw3_l3:'Управление сетью торговых точек', sw3_l4:'Аналитика продаж в реальном времени',
+    sw_connect:'Подключить',
+    cli_tag:'Нашим клиентам доверяют', cli_h2:'Наши <span>клиенты</span>',
+    faq_tag:'Вопросы и ответы', faq_h2:'Часто задаваемые <span>вопросы</span>',
+    faq1_q:'Какие преимущества даёт автоматизация бизнес-процессов?', faq1_a:'Автоматизация снижает операционные затраты на 20–40%, освобождает сотрудников от рутины, уменьшает количество ошибок и даёт руководителю полную картину бизнеса в реальном времени.',
+    faq2_q:'Какие бизнес-процессы вы можете автоматизировать?', faq2_a:'Мы автоматизируем складской и товарный учёт, управление продажами и CRM, документооборот, финансовую отчётность, работу с клиентами, производственные процессы, HR и многое другое.',
+    faq3_q:'В каких сферах вы работаете?', faq3_a:'Торговля, производство, гостиничный и ресторанный бизнес, сельское хозяйство, строительство. Если ваша сфера не указана — свяжитесь с нами, найдём решение под ваши задачи.',
+    faq4_q:'Как долго длится внедрение системы?', faq4_a:'Базовое внедрение занимает 2–4 недели. Более сложные проекты — от 1 до 3 месяцев. Мы всегда составляем реалистичный план и придерживаемся сроков.',
+    faq5_q:'Какую поддержку вы оказываете после внедрения?', faq5_a:'Техническая поддержка, регулярные обновления и консультации. Ваши сотрудники могут обратиться к нам в рабочее время, а критические вопросы решаются в режиме 24/7.',
+    cta_tag:'Начать сейчас', cta_h2:'Готовы перевести<br>бизнес на <span>автопилот?</span>',
+    cta_p:'Оставьте заявку — наш менеджер свяжется с вами, проведёт бесплатный аудит и предложит оптимальное решение.',
+    con_tag:'Контакты', con_h2:'Свяжитесь<br>с <span>нами</span>',
+    con_phone:'Телефон', con_email:'Email', con_addr:'Адрес',
+    form_h3:'Оставить заявку', form_sub:'Заполните форму — ответим в течение 15 минут',
+    lbl_name:'Ваше имя', lbl_phone:'Телефон', lbl_sphere:'Сфера ИТ', lbl_note:'Примечание', lbl_note_hint:'(до 40 символов)',
+    submit_btn:'Отправить заявку', ok_h:'Заявка отправлена!', ok_p:'Менеджер свяжется с вами в течение 15 минут.',
+  },
+  kz: {
+    nav_ben:'Артықшылықтар', nav_svc:'Қызметтер', nav_sw:'БҚ', nav_cli:'Клиенттер', nav_con:'Байланыс',
+    cta_btn:'Өтінім қалдыру', cta_btn2:'Тегін өтінім қалдыру',
+    hero_badge:'Қазақстандағы бизнесті автоматтандыру',
+    hero_h1:'Бизнесіңізді <br><span>автопилот</span> режиміне көшіріңіз',
+    hero_sub:'Күнделікті тапсырмалардан бас тартыңыз, операциялық шығындарды азайтыңыз және пайданы арттырыңыз. Нәтиже бірінші айда-ақ сезіледі.',
+    hero_svc_btn:'Біздің қызметтер →',
+    stat1:'Автоматтандырылған<br>компаниялар', stat2:'Операциялық шығындардың<br>төмендеуі', stat3:'Бірінші нәтижеге<br>дейін',
+    ben_tag:'Неліктен автоматтандыру керек',
+    ben_h2:'Автоматтандырудың нәтижесі<br><span>бірден сезіледі</span>',
+    ben_sub:'Бизнесті әлемнің кез келген нүктесінен басқарыңыз, көрсеткіштерді бақылаңыз және өсу қарқынын арттырыңыз.',
+    ben1_h:'Дүние жүзінің кез келген нүктесінен басқару', ben1_p:'Барлық процестерді телефон немесе ноутбук арқылы бақылаңыз — кеңседен, үйден немесе шетелден.',
+    ben2_h:'Көрсеткіштер мен пайданы бақылау', ben2_p:'Нақты уақыттағы автоматты есептер. Компанияда не болып жатқанын әрдайым білесіз.',
+    ben3_h:'Жоғары масштабтану жылдамдығы', ben3_p:'Қызметкерлер санын көбейтпей жаңа нүктелер ашыңыз және процестерді іске қосыңыз.',
+    ben4_h:'Тұтынушыларға қызмет көрсету сапасы', ben4_p:'Тапсырыстарды тезірек өңдеңіз, қателер азырақ, сатып алушылардың қанағаттануы жоғарырақ.',
+    ben5_h:'Автоматты есептер', ben5_p:'Excel кестелерін ұмытыңыз — жүйенің өзі кестеге сәйкес қажетті есептерді жасайды.',
+    ben6_h:'Бақылауды күшейту', ben6_p:'Қызметкерлердің әрбір әрекетін тіркеңіз, теріс пайдалану мен шығындарды азайтыңыз.',
+    ind_tag:'Салалар', ind_h2:'Кез келген бизнесті <span>автоматтандырамыз</span>',
+    ind_sub:'Сауда саласынан ауыл шаруашылығына дейін әртүрлі салалармен жұмыс жасаймыз.',
+    ind_t1:'🛒 Сауда', ind_t2:'🏭 Өндіріс', ind_t3:'🏨 Қонақүйлер', ind_t4:'🍽️ Мейрамханалар', ind_t5:'🌾 Ауыл шаруашылығы', ind_t6:'🏗️ Құрылыс',
+    ip1_h:'Сауданы автоматтандыру', ip1_p:'Тауар есебінің заманауи жүйесін енгізіңіз, қалдықтарды, бағаларды және сатып алуларды басқарыңыз.',
+    ip1_l1:'Нақты уақыттағы тауар мен қалдық есебі', ip1_l2:'Жеткізушілерге автоматты тапсырыстар', ip1_l3:'Адалдық бағдарламасы және CRM', ip1_l4:'Бірнеше нүктені басқару', ip1_l5:'Онлайн-кассамен интеграция',
+    ip2_h:'Өндірісті автоматтандыру', ip2_p:'Шикізаттан дайын өнімге дейінгі бүкіл өндірістік циклді бір жүйеде бақылаңыз.',
+    ip2_l1:'Шикізат пен дайын өнім есебі', ip2_l2:'Өндірістік процестерді бақылау', ip2_l3:'Тапсырыстар мен жөнелтулерді басқару', ip2_l4:'Қоймамен интеграция', ip2_l5:'Аналитика және есептілік',
+    ip3_h:'Қонақүйлерді автоматтандыру', ip3_p:'Брондауларды, нөмір қорын және персоналды бір жүйе арқылы басқарыңыз.',
+    ip3_l1:'Нөмірлерді онлайн брондау', ip3_l2:'Жүктелімді басқару', ip3_l3:'Қосымша қызметтер есебі', ip3_l4:'Персоналды бақылау', ip3_l5:'OTA платформаларымен интеграция',
+    ip4_h:'Мейрамханаларды автоматтандыру', ip4_p:'Қызмет көрсетуді жеделдетіңіз, шығындарды азайтыңыз және мәзірді, асүйді, персоналды оңай басқарыңыз.',
+    ip4_l1:'Зал мен асүйді автоматтандыру', ip4_l2:'Мәзір мен бағаларды басқару', ip4_l3:'Тағам мен ингредиенттер есебі', ip4_l4:'Адалдық бағдарламалары', ip4_l5:'Онлайн жеткізу және агрегаторлар',
+    ip5_h:'Ауыл шаруашылығын автоматтандыру', ip5_p:'АӨК басқарудың бірыңғай жүйесінде егін, техника, қойма және қаржы есебін жүргізіңіз.',
+    ip5_l1:'Жер учаскелері мен дақылдар есебі', ip5_l2:'Техника мен ресурстарды басқару', ip5_l3:'Астық пен өнімнің қойма есебі', ip5_l4:'Қаржылық есеп және есептілік', ip5_l5:'Қызметкерлер мен тапсырмаларды бақылау',
+    ip6_h:'Құрылысты автоматтандыру', ip6_p:'Құрылыс нысандарының жобаларын, материалдарын, мердігерлерін және қаржысын басқарыңыз.',
+    ip6_l1:'Жобалар мен нысандарды басқару', ip6_l2:'Материалдар мен жеткізушілер есебі', ip6_l3:'Бюджет пен сметаны бақылау', ip6_l4:'Құжат айналымы және келісулер', ip6_l5:'Мерзімдер мен тапсырмаларды бақылау',
+    svc_tag:'Біз не жасаймыз', svc_h2:'Біздің <span>қызметтер</span>',
+    svc_sub:'Бизнесті талдаудан автоматтандыру жүйесін іске қосу және сүйемелдеуге дейін толық цикл.',
+    svc1_h:'Есеп жүйелерін енгізу', svc1_p:'Бизнесіңізге арналған тауар есебі, касса шешімдері және ERP жүйелерін баптау және іске қосу.',
+    svc2_h:'CRM және сатуды автоматтандыру', svc2_p:'Bitrix24 және басқа CRM жүйелерін енгізу: воронкалар, тапсырмалар, автоматты жіберулер және аналитика.',
+    svc3_h:'БҚ интеграциясы және баптауы', svc3_p:'Жүйелерді бір-бірімен интеграциялаймыз: 1С, iiko, Rosta, онлайн-кассалар, банктер және мессенджерлер.',
+    svc4_h:'Персоналды оқыту', svc4_p:'Қызметкерлерді жаңа жүйелермен жұмыс жасауға тікелей немесе онлайн форматта үйретеміз.',
+    svc5_h:'Техникалық қолдау', svc5_p:'24/7 жедел қолдау, жаңартулар және жүйені бизнес қажеттіліктеріне сай доработка.',
+    svc6_h:'Жабдық жеткізу', svc6_p:'Кассалар, сканерлер, өлшеу жабдығы, асүй мониторлары — толық жиынтық.',
+    sw_tag:'Бағдарламалық қамтамасыз ету', sw_h2:'Бизнесіңіз үшін <span>үздік шешімдер</span>',
+    sw_sub:'Тексерілген платформалармен жұмыс жасаймыз — енгіземіз, баптаймыз және сүйемелдейміз.',
+    sw1_t:'CRM · Тапсырмалар · Автоматтандыру',
+    sw1_p:'Бизнесті басқаруға арналған бірыңғай кеңістік: CRM, тапсырмалар, құжат айналымы, бағдарламалаусыз жұмыс процестерін автоматтандыру.',
+    sw1_l1:'Сатуларды және воронкаларды басқару', sw1_l2:'Тапсырмалар мен келісулерді автоматтандыру', sw1_l3:'Корпоративтік портал және чат', sw1_l4:'Телефония және жіберулер',
+    sw2_t:'Мейрамханалар · Кафе · Жеткізу',
+    sw2_p:'Қоғамдық тамақтандыру үшін автоматтандырудың жетекші жүйесі: зал, асүй, қойма және жеткізуді бір шешімде басқару.',
+    sw2_l1:'Тапсырыстар жүйесі және асүй экраны', sw2_l2:'Қойма және қаржылық есеп', sw2_l3:'Адалдық бағдарламасы', sw2_l4:'Жеткізу агрегаторларымен интеграция',
+    sw3_t:'Сауда · Қойма · Аналитика',
+    sw3_p:'Дүкендер, кафе және мейрамханаларға арналған заманауи есеп жүйесі — жылдам іске қосу және ыңғайлы интерфейс.',
+    sw3_l1:'Тауар мен қалдық есебі', sw3_l2:'Онлайн-касса және фискализация', sw3_l3:'Сауда нүктелерінің желісін басқару', sw3_l4:'Нақты уақыттағы сату аналитикасы',
+    sw_connect:'Қосылу',
+    cli_tag:'Клиенттеріміз сенеді', cli_h2:'Біздің <span>клиенттер</span>',
+    faq_tag:'Сұрақтар мен жауаптар', faq_h2:'Жиі қойылатын <span>сұрақтар</span>',
+    faq1_q:'Бизнес-процестерді автоматтандыру қандай артықшылықтар береді?', faq1_a:'Автоматтандыру операциялық шығындарды 20–40%-ға азайтады, қызметкерлерді рутинадан босатады, қателер санын азайтады және басшыға нақты уақытта бизнестің толық бейнесін береді.',
+    faq2_q:'Қандай бизнес-процестерді автоматтандыра аласыздар?', faq2_a:'Біз қойма және тауар есебін, сату менеджментін және CRM-ді, құжат айналымын, қаржылық есептілікті, тұтынушылармен жұмысты, өндірістік процестерді, HR және басқа көп нәрсені автоматтандырамыз.',
+    faq3_q:'Қандай салаларда жұмыс жасайсыздар?', faq3_a:'Сауда, өндіріс, қонақүй және мейрамхана бизнесі, ауыл шаруашылығы, құрылыс. Егер сіздің саланыз көрсетілмесе — бізге хабарласыңыз, міндеттеріңізге сай шешім табамыз.',
+    faq4_q:'Жүйені енгізу қанша уақыт алады?', faq4_a:'Негізгі енгізу 2–4 апта алады. Күрделірек жобалар — 1-ден 3 айға дейін. Біз әрдайым реалистік жоспар жасап, мерзімдерді сақтаймыз.',
+    faq5_q:'Енгізуден кейін қандай қолдау көрсетесіздер?', faq5_a:'Техникалық қолдау, тұрақты жаңартулар және кеңестер. Сіздің қызметкерлеріңіз жұмыс уақытында бізге жүгіне алады, ал маңызды мәселелер 24/7 режимде шешіледі.',
+    cta_tag:'Қазір бастау', cta_h2:'Бизнесті <span>автопилотқа</span><br>дайынсыз ба?',
+    cta_p:'Өтінім қалдырыңыз — менеджеріміз хабарласып, тегін аудит жүргізеді және оңтайлы шешім ұсынады.',
+    con_tag:'Байланыс', con_h2:'<span>Бізбен</span><br>байланысыңыз',
+    con_phone:'Телефон', con_email:'Эл. пошта', con_addr:'Мекенжай',
+    form_h3:'Өтінім қалдыру', form_sub:'Форманы толтырыңыз — 15 минут ішінде жауап береміз',
+    lbl_name:'Атыңыз', lbl_phone:'Телефон', lbl_sphere:'ИТ саласы', lbl_note:'Ескертпе', lbl_note_hint:'(40 таңбаға дейін)',
+    submit_btn:'Өтінім жіберу', ok_h:'Өтінім жіберілді!', ok_p:'Менеджер 15 минут ішінде сізбен хабарласады.',
+  },
+  en: {
+    nav_ben:'Benefits', nav_svc:'Services', nav_sw:'Software', nav_cli:'Clients', nav_con:'Contacts',
+    cta_btn:'Get a Quote', cta_btn2:'Get a Free Quote',
+    hero_badge:'Business Automation in Kazakhstan',
+    hero_h1:'Put Your Business<br>on <span>Autopilot</span>',
+    hero_sub:'Eliminate routine tasks, reduce operational costs and increase profit. Results are visible within the first month of implementation.',
+    hero_svc_btn:'Our Services →',
+    stat1:'Automated<br>Companies', stat2:'Reduction in Operational<br>Costs', stat3:'To First<br>Result',
+    ben_tag:'Why Automate',
+    ben_h2:'The Impact of Automation<br><span>Is Felt Immediately</span>',
+    ben_sub:'Manage your business from anywhere in the world, monitor KPIs and accelerate your growth rate.',
+    ben1_h:'Manage from Anywhere in the World', ben1_p:'Monitor all processes via phone or laptop — from the office, home or another country.',
+    ben2_h:'Track KPIs and Profit', ben2_p:'Automatic real-time reports. You always know what is happening in your company.',
+    ben3_h:'High Scaling Speed', ben3_p:'Open new locations and launch processes without increasing headcount.',
+    ben4_h:'Customer Service Quality', ben4_p:'Process orders faster, fewer errors, higher customer satisfaction.',
+    ben5_h:'Automatic Reports', ben5_p:'Forget Excel spreadsheets — the system generates the reports you need on schedule.',
+    ben6_h:'Increased Control', ben6_p:'Record every employee action, minimize abuse and losses.',
+    ind_tag:'Industries', ind_h2:'We Automate <span>Any Business</span>',
+    ind_sub:'We work across many sectors — from retail to agriculture.',
+    ind_t1:'🛒 Retail', ind_t2:'🏭 Manufacturing', ind_t3:'🏨 Hotels', ind_t4:'🍽️ Restaurants', ind_t5:'🌾 Agriculture', ind_t6:'🏗️ Construction',
+    ip1_h:'Retail Automation', ip1_p:'Implement a modern inventory system, manage stock, prices and procurement.',
+    ip1_l1:'Real-time inventory and stock tracking', ip1_l2:'Automatic supplier orders', ip1_l3:'Loyalty program and CRM', ip1_l4:'Multi-location management', ip1_l5:'POS system integration',
+    ip2_h:'Manufacturing Automation', ip2_p:'Monitor the entire production cycle from raw materials to finished goods in one system.',
+    ip2_l1:'Raw materials and finished goods accounting', ip2_l2:'Production process control', ip2_l3:'Order and shipment management', ip2_l4:'Warehouse integration', ip2_l5:'Analytics and reporting',
+    ip3_h:'Hotel Automation', ip3_p:'Manage reservations, room inventory and staff through a unified system.',
+    ip3_l1:'Online room booking', ip3_l2:'Occupancy management', ip3_l3:'Additional services accounting', ip3_l4:'Staff control', ip3_l5:'OTA platform integration',
+    ip4_h:'Restaurant Automation', ip4_p:'Speed up service, reduce waste and manage your menu, kitchen and staff with ease.',
+    ip4_l1:'Floor and kitchen automation', ip4_l2:'Menu and pricing management', ip4_l3:'Dish and ingredient accounting', ip4_l4:'Loyalty programs', ip4_l5:'Online delivery and aggregators',
+    ip5_h:'Agriculture Automation', ip5_p:'Track harvests, equipment, warehouse and finances in a unified agribusiness management system.',
+    ip5_l1:'Land plots and crops accounting', ip5_l2:'Equipment and resource management', ip5_l3:'Grain and produce warehouse accounting', ip5_l4:'Financial accounting and reporting', ip5_l5:'Employee and task control',
+    ip6_h:'Construction Automation', ip6_p:'Manage projects, materials, contractors and finances for construction sites.',
+    ip6_l1:'Project and site management', ip6_l2:'Materials and supplier accounting', ip6_l3:'Budget and estimate control', ip6_l4:'Document flow and approvals', ip6_l5:'Deadline and task tracking',
+    svc_tag:'What We Do', svc_h2:'Our <span>Services</span>',
+    svc_sub:'Full cycle — from business analysis to launch and support of the automation system.',
+    svc1_h:'Accounting System Implementation', svc1_p:'Setup and launch of inventory, POS and ERP systems tailored to your business.',
+    svc2_h:'CRM and Sales Automation', svc2_p:'Bitrix24 and other CRM implementations: pipelines, tasks, automated campaigns and analytics.',
+    svc3_h:'Software Integration & Setup', svc3_p:'We integrate systems with each other: 1C, iiko, Rosta, POS systems, banks and messengers.',
+    svc4_h:'Staff Training', svc4_p:'We train employees to work with new systems — in person or online.',
+    svc5_h:'Technical Support', svc5_p:'Rapid 24/7 support, updates and system customization to business needs.',
+    svc6_h:'Equipment Supply', svc6_p:'POS terminals, scanners, weighing equipment, kitchen displays — full package.',
+    sw_tag:'Software', sw_h2:'Best <span>Solutions</span> for Your Business',
+    sw_sub:'We work with trusted platforms — we implement, configure and support them.',
+    sw1_t:'CRM · Tasks · Automation',
+    sw1_p:'A unified space for business management: CRM, tasks, document flow and workflow automation without coding.',
+    sw1_l1:'Sales and pipeline management', sw1_l2:'Task and approval automation', sw1_l3:'Corporate portal and chat', sw1_l4:'Telephony and campaigns',
+    sw2_t:'Restaurants · Cafés · Delivery',
+    sw2_p:'The leading automation system for food service: floor, kitchen, warehouse and delivery management in one solution.',
+    sw2_l1:'Order system and kitchen display', sw2_l2:'Warehouse and financial accounting', sw2_l3:'Loyalty program', sw2_l4:'Delivery aggregator integration',
+    sw3_t:'Retail · Warehouse · Analytics',
+    sw3_p:'A modern accounting system for stores, cafés and restaurants — quick start and intuitive interface.',
+    sw3_l1:'Inventory and stock tracking', sw3_l2:'Online POS and fiscalization', sw3_l3:'Retail chain management', sw3_l4:'Real-time sales analytics',
+    sw_connect:'Connect',
+    cli_tag:'Our Clients Trust Us', cli_h2:'Our <span>Clients</span>',
+    faq_tag:'Q & A', faq_h2:'Frequently Asked <span>Questions</span>',
+    faq1_q:'What are the benefits of business process automation?', faq1_a:'Automation reduces operational costs by 20–40%, frees employees from routine work, reduces errors and gives management a complete picture of the business in real time.',
+    faq2_q:'What business processes can you automate?', faq2_a:'We automate warehouse and inventory accounting, sales management and CRM, document flow, financial reporting, customer service, production processes, HR and much more.',
+    faq3_q:'Which industries do you work with?', faq3_a:'Retail, manufacturing, hospitality, restaurant business, agriculture, construction. If your industry is not listed — contact us and we will find a solution for your needs.',
+    faq4_q:'How long does implementation take?', faq4_a:'Basic implementation takes 2–4 weeks. More complex projects — from 1 to 3 months. We always create a realistic plan and stick to deadlines.',
+    faq5_q:'What support do you provide after implementation?', faq5_a:'Technical support, regular updates and consultations. Your employees can reach us during business hours, and critical issues are resolved 24/7.',
+    cta_tag:'Start Now', cta_h2:'Ready to Put Your<br>Business on <span>Autopilot?</span>',
+    cta_p:'Submit a request — our manager will contact you, conduct a free audit and offer the best solution.',
+    con_tag:'Contacts', con_h2:'Get in<br><span>Touch</span>',
+    con_phone:'Phone', con_email:'Email', con_addr:'Address',
+    form_h3:'Get a Quote', form_sub:'Fill out the form — we\'ll reply within 15 minutes',
+    lbl_name:'Your Name', lbl_phone:'Phone', lbl_sphere:'IT Area', lbl_note:'Note', lbl_note_hint:'(up to 40 characters)',
+    submit_btn:'Submit Request', ok_h:'Request Sent!', ok_p:'Our manager will contact you within 15 minutes.',
+  }
+};
+
+let curLang = 'ru';
+function setLang(lang) {
+  curLang = lang;
+  const tr = T[lang];
+  // update all marked elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (tr[key] !== undefined) el.innerHTML = tr[key];
+  });
+  // update lang buttons
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.trim() === (lang==='ru'?'РУ':lang==='kz'?'ҚАЗ':'EN'));
+  });
+  // update form placeholders & options
+  const phs = {
+    ru: {name:'Иван Иванов', phone:'+7 (___) ___-__-__', note:'Ваш комментарий...', sphere:'Выберите сферу ИТ'},
+    kz: {name:'Аты жөніңіз', phone:'+7 (___) ___-__-__', note:'Пікіріңіз...', sphere:'ИТ саласын таңдаңыз'},
+    en: {name:'John Smith', phone:'+7 (___) ___-__-__', note:'Your comment...', sphere:'Select IT area'},
+  };
+  const p = phs[lang];
+  ['cN','mN'].forEach(id => { const el=document.getElementById(id); if(el) el.placeholder=p.name; });
+  ['cP','mP'].forEach(id => { const el=document.getElementById(id); if(el) el.placeholder=p.phone; });
+  ['cNo','mNo'].forEach(id => { const el=document.getElementById(id); if(el) el.placeholder=p.note; });
+  // update select first option
+  const sphereOpts = {
+    ru: ['Выберите сферу ИТ','Разработка сайтов','Разработка мобильных приложений','Автоматизация бизнес-процессов','CRM / ERP системы','IT-консалтинг','Кибербезопасность','Облачные решения','Другое'],
+    kz: ['ИТ саласын таңдаңыз','Сайт жасау','Мобильді қосымшалар','Бизнес-процестерді автоматтандыру','CRM / ERP жүйелері','IT-кеңес беру','Киберқауіпсіздік','Бұлтты шешімдер','Басқа'],
+    en: ['Select IT area','Web Development','Mobile App Development','Business Process Automation','CRM / ERP Systems','IT Consulting','Cybersecurity','Cloud Solutions','Other'],
+  };
+  ['cS','mS'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const opts = sphereOpts[lang];
+    Array.from(sel.options).forEach((opt, i) => { if(opts[i]) opt.text = opts[i]; });
+  });
+  // update submit buttons
+  const submitTxt = {ru:'Отправить заявку', kz:'Өтінім жіберу', en:'Submit Request'};
+  ['cBtn','mBtn'].forEach(id => { const el=document.getElementById(id); if(el && !el.disabled) el.textContent=submitTxt[lang]; });
+}
+
+</script>
+</body>
+</html>
